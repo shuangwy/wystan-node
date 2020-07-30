@@ -23,7 +23,7 @@ class SuccessModel extends BaseModel {
 class ErrorModel extends BaseModel {
     constructor(data, message) {
         super(data, message)
-        this.status = 'error'
+        this.status = 'failure'
         this._failure = true
     }
 }
