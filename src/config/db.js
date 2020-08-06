@@ -20,3 +20,7 @@ if (env === 'production') {
         database: 'wystanblog'
     }
 }
+
+module.exports = {
+    MYSQL_CONF
+}
