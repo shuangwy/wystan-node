@@ -1,21 +1,31 @@
 const handleBlogRouter = require('./src/router/blog')
 const handleUserRouter = require('./src/router/user')
+const querystring = require('querystring')
 
-const getPostData = (req) => {
+const SESSION_DATA = {}
+
+const getCookieExpores = () => {
+    const d = new Date()
+    d.setTime(d.getTime() + (24 * 60 * 1000))
+    return d.toGMTString()
+}
+
+
+const getPostData = (request) => {
     return new Promise((resovle, reject) => {
-        if (req.method !== "POST") {
+        if (request.method !== "POST") {
             resovle()
             return
         }
-        if (req.headers['content-type'] !== 'application/json') {
+        if (request.headers['content-type'] !== 'application/json') {
             resovle()
             return
         }
         let postData = ''
-        req.on('data', chunk => {
+        request.on('data', chunk => {
             postData += chunk.toString()
         })
-        req.on('end', () => {
+        request.on('end', () => {
             if (!postData) {
                 resovle()
                 return
@@ -25,43 +35,61 @@ const getPostData = (req) => {
     })
 }
 
-const querystring = require('querystring')
 
-
-
-const serverHandle = (req, res) => {
+const serverHandle = (request, response) => {
+    
     const resFailure = (errmessage) => {
-        res.writeHead(404, {
+        response.writeHead(404, {
             'Content-type': 'text/plain'
         })
-        res.write("404 Not Found")
-        res.end(JSON.stringify({
+        response.write("404 Not Found")
+        response.end(JSON.stringify({
             _failure: true,
             ...errmessage
         }))
     }
-    res.setHeader('Content-type', 'application/json')
-    const url = req.url
-    req.path = url.split('?')[0]
-    req.query = querystring.parse(url.split('?')[1])
-    req.cookie = {}
-    const cookieStr = req.headers.cookie
+
+    response.setHeader('Content-type', 'application/json')
+    const url = request.url
+    request.path = url.split('?')[0]
+    request.query = querystring.parse(url.split('?')[1])
+    request.cookie = {}
+    const cookieStr = request.headers.cookie
     cookieStr && cookieStr.split(';').forEach(item => {
         if (item) {
             const arr = item.split('=')
-            req.cookie[arr[0].trim()] = arr[1].trim()
+            request.cookie[arr[0].trim()] = arr[1].trim()
         }
     })
-    console.log(11111, req.cookie)
-    getPostData(req).then(postData => {
-        if (postData) {
-            req.body = JSON.parse(postData)
+
+    let needSetCookie = false
+    let userId = request.cookie.userid
+    console.log(555, request.cookie)
+    if (userId) {
+        if (!SESSION_DATA[userId]) {
+            SESSION_DATA[userId] = {}
         }
-        const blogData = handleBlogRouter(req, res)
+    } else {
+        needSetCookie = true
+        userId = `${Date.now()}_${Math.random()}`
+        SESSION_DATA[userId] = {}
+    }
+    request.session = SESSION_DATA[userId]
+
+
+    getPostData(request).then(postData => {
+        if (postData) {
+            request.body = JSON.parse(postData)
+        }
+        const blogData = handleBlogRouter(request, response)
         if (blogData) {
             blogData.then(response => {
                 if (response && response.status === 'success') {
-                    res.end(JSON.stringify({
+                    if (needSetCookie) {
+                        response.setHeader('Set-Coookie',
+                            `userid=${userId}; path=/; httpOnly; expires=${getCookieExpores()}`)
+                    }
+                    response.end(JSON.stringify({
                         ...response
                     }))
                     return
@@ -72,19 +100,20 @@ const serverHandle = (req, res) => {
                 resFailure(err)
             })
         }
-        const userData = handleUserRouter(req, res)
+        const userData = handleUserRouter(request, response)
         if (userData) {
-            userData.then(response => {
-                if (response && response.status === 'success') {
-                    // res.writeHead(200, {
-                    //     'Set-Cookit':['item=123; path=/; httpOnly']
-                    // })
-                    res.end(JSON.stringify({
-                        ...response
+            userData.then(data => {
+                if (data && data.status === 'success') {
+                    if (needSetCookie) {
+                        response.setHeader('Set-Cookie',
+                            `userid=${userId}; path='/'; httpOnly; expires=${getCookieExpores()}`)
+                    }
+                    response.end(JSON.stringify({
+                        ...data
                     }))
                     return
                 } else {
-                    resFailure(response)
+                    resFailure(data)
                 }
             }).catch(err => {
                 resFailure(err)

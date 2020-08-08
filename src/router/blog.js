@@ -10,12 +10,12 @@ const {
     ErrorModel
 } = require('../model/resModel')
 
-const handleBlogRoute = (req, res) => {
-    const method = req.method
-    const id = req.query.id
-    if (method === 'GET' && req.path === '/api/blog/list') {
-        const author = req.query.author || ''
-        const keyword = req.query.keyword || ''
+const handleBlogRoute = (request, res) => {
+    const method = request.method
+    const id = request.query.id
+    if (method === 'GET' && request.path === '/api/blog/list') {
+        const author = request.query.author || ''
+        const keyword = request.query.keyword || ''
         return getList(author, keyword).then(res => {
             return new SuccessModel(res)
         }).catch(err => {
@@ -23,16 +23,16 @@ const handleBlogRoute = (req, res) => {
         })
 
     }
-    if (method === 'GET' && req.path === '/api/blog/detail') {
+    if (method === 'GET' && request.path === '/api/blog/detail') {
         return getDetail(id).then(res => {
             return new SuccessModel(res)
         })
 
     }
     // add
-    if (method === 'POST' && req.path === '/api/blog/addnewBlog') {
-        const blogData = req.body
-        req.body.author = "wsanshaung"
+    if (method === 'POST' && request.path === '/api/blog/addnewBlog') {
+        const blogData = request.body
+        request.body.author = "wsanshaung"
         return newBlog(blogData).then(res => {
             return new SuccessModel(res)
         }).catch(err => {
@@ -40,8 +40,8 @@ const handleBlogRoute = (req, res) => {
         })
     }
     // update
-    if (method === 'POST' && req.path === '/api/blog/update') {
-        const blogData = req.body
+    if (method === 'POST' && request.path === '/api/blog/update') {
+        const blogData = request.body
         return updateBlog(id, blogData).then(res => {
             if (res) {
                 return new SuccessModel('update success')
@@ -49,7 +49,7 @@ const handleBlogRoute = (req, res) => {
             return new ErrorModel('update failure')
         })
     }
-    if (method === 'GET' && req.path === '/api/blog/delete') {
+    if (method === 'GET' && request.path === '/api/blog/delete') {
         const author='zhangsan'
         return deleteBlog(id, author).then(res=>{
             if (res) {

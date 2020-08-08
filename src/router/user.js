@@ -7,30 +7,28 @@ const {
     ErrorModel
 } = require('../model/resModel')
 
-const getCookieExpores = () => {
-    const d = new Date()
-    d.setTime(d.getTime() + (24 * 60 * 1000))
-    return d.toGMTString()
-}
-
-const handleUserRouter = (req, res) => {
-    const method = req.method
-    if (method === 'POST' && req.path === '/api/user/login') {
+const handleUserRouter = (request, res) => {
+    const method = request.method
+    if (method === 'GET' && request.path === '/api/user/login') {
         const {
             username,
             password
-        } = req.body
-        return login(username, password).then(result => {
-            if (result.username === username) {
-                res.setHeader('Set-Coookie',
-                    `username=${username}; path='/'; httpOnly; expires=${getCookieExpores()}`)
+        } = request.query
+        return login(username, password).then(data => {
+            if (data.username) {
+                const {
+                    username,
+                    realname
+                } = data
+                request.session.username = username
+                request.session.realname = realname
                 return new SuccessModel('login success')
             }
             return new ErrorModel('login failure')
         })
     }
-    if (method === 'GET' && req.path === '/api/user/login-test') {
-        if (req.cookie.username) {
+    if (method === 'GET' && request.path === '/api/user/login-test') {
+        if (request.session.username) {
             return Promise.resolve(new SuccessModel('have landed'))
         } else {
             return Promise.resolve(new ErrorModel('not login'))
