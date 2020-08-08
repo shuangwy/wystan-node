@@ -18,13 +18,13 @@ const handleBlogRoute = (req, res) => {
         const keyword = req.query.keyword || ''
         return getList(author, keyword).then(res => {
             return new SuccessModel(res)
-        }).catch(err=>{
+        }).catch(err => {
             return new ErrorModel(err)
         })
 
     }
     if (method === 'GET' && req.path === '/api/blog/detail') {
-        return getDetail(id).then(res=>{
+        return getDetail(id).then(res => {
             return new SuccessModel(res)
         })
 
@@ -32,29 +32,31 @@ const handleBlogRoute = (req, res) => {
     // add
     if (method === 'POST' && req.path === '/api/blog/addnewBlog') {
         const blogData = req.body
-        req.body.author="wsanshaung"
-        return newBlog(blogData).then(res=>{
+        req.body.author = "wsanshaung"
+        return newBlog(blogData).then(res => {
             return new SuccessModel(res)
-        }).catch(err=>{
+        }).catch(err => {
             return new ErrorModel(err)
         })
     }
     // update
     if (method === 'POST' && req.path === '/api/blog/update') {
         const blogData = req.body
-        const result = updateBlog(id, blogData)
-        if (result) {
-            return new SuccessModel(result)
-        } else {
+        return updateBlog(id, blogData).then(res => {
+            if (res) {
+                return new SuccessModel('update success')
+            }
             return new ErrorModel('update failure')
-        }
+        })
     }
     if (method === 'GET' && req.path === '/api/blog/delete') {
-        if (deleteBlog(id)) {
-            return new SuccessModel(deleteBlog(id))
-        } else {
+        const author='zhangsan'
+        return deleteBlog(id, author).then(res=>{
+            if (res) {
+                return new SuccessModel('delete success')
+            }
             return new ErrorModel('delete failure')
-        }
+        })
     }
 }
 

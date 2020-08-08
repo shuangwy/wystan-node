@@ -23,27 +23,42 @@ const newBlog = (blogData = {}) => {
         author
     } = blogData
     const createtime = Date.now()
-    if(title && content && author){
+    if (title && content && author) {
         const sql = `insert into blogs (title,content,author,createtime)
         values('${title}','${content}','${author}', ${createtime})`
-        return exec(sql).then(res=>{
+        return exec(sql).then(res => {
             return {
                 id: res.insertId
             }
         })
-    }else{
-      return new Promise((resolve,reject)=>{
-          reject('missing data')
-      })
+    } else {
+        return new Promise((resolve, reject) => {
+            reject('missing data')
+        })
     }
 }
 const updateBlog = (id, blogData = {}) => {
-    return true
+    const {
+        title,
+        content
+    } = blogData
+    const sql = `update blogs set title='${title}',content='${content}' where id=${id}`
+    return exec(sql).then(res => {
+        if (res.affectedRows > 0) {
+            return true
+        }
+        return false
+    })
 }
-const deleteBlog = (id) => {
-    if (id) {
-        return true
-    }
+const deleteBlog = (id, author) => {
+    const sql = `delete from blogs where id=${id} and author='${author}'`
+    return exec(sql).then(res => {
+        console.log('res', res)
+        if (res.affectedRows > 0) {
+            return true
+        }
+        return false
+    })
 }
 
 module.exports = {

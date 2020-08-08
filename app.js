@@ -30,7 +30,7 @@ const querystring = require('querystring')
 
 
 const serverHandle = (req, res) => {
-    const resFailure=(errmessage)=>{
+    const resFailure = (errmessage) => {
         res.writeHead(404, {
             'Content-type': 'text/plain'
         })
@@ -44,6 +44,15 @@ const serverHandle = (req, res) => {
     const url = req.url
     req.path = url.split('?')[0]
     req.query = querystring.parse(url.split('?')[1])
+    req.cookie = {}
+    const cookieStr = req.headers.cookie
+    cookieStr && cookieStr.split(';').forEach(item => {
+        if (item) {
+            const arr = item.split('=')
+            req.cookie[arr[0].trim()] = arr[1].trim()
+        }
+    })
+    console.log(11111, req.cookie)
     getPostData(req).then(postData => {
         if (postData) {
             req.body = JSON.parse(postData)
@@ -52,19 +61,34 @@ const serverHandle = (req, res) => {
         if (blogData) {
             blogData.then(response => {
                 if (response && response.status === 'success') {
-                    res.end(JSON.stringify({...response}))
+                    res.end(JSON.stringify({
+                        ...response
+                    }))
                     return
-                }else{
+                } else {
                     resFailure(response)
                 }
-            }).catch(err=>{
+            }).catch(err => {
                 resFailure(err)
             })
         }
         const userData = handleUserRouter(req, res)
-        if (userData && userData.status === 'success') {
-            res.end(JSON.stringify(userData))
-            return
+        if (userData) {
+            userData.then(response => {
+                if (response && response.status === 'success') {
+                    // res.writeHead(200, {
+                    //     'Set-Cookit':['item=123; path=/; httpOnly']
+                    // })
+                    res.end(JSON.stringify({
+                        ...response
+                    }))
+                    return
+                } else {
+                    resFailure(response)
+                }
+            }).catch(err => {
+                resFailure(err)
+            })
         }
     })
 }
