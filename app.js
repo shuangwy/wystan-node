@@ -37,7 +37,7 @@ const getPostData = (request) => {
 
 
 const serverHandle = (request, response) => {
-    
+
     const resFailure = (errmessage) => {
         response.writeHead(404, {
             'Content-type': 'text/plain'
@@ -64,7 +64,6 @@ const serverHandle = (request, response) => {
 
     let needSetCookie = false
     let userId = request.cookie.userid
-    console.log(555, request.cookie)
     if (userId) {
         if (!SESSION_DATA[userId]) {
             SESSION_DATA[userId] = {}
@@ -75,8 +74,6 @@ const serverHandle = (request, response) => {
         SESSION_DATA[userId] = {}
     }
     request.session = SESSION_DATA[userId]
-
-
     getPostData(request).then(postData => {
         if (postData) {
             request.body = JSON.parse(postData)
@@ -106,7 +103,7 @@ const serverHandle = (request, response) => {
                 if (data && data.status === 'success') {
                     if (needSetCookie) {
                         response.setHeader('Set-Cookie',
-                            `userid=${userId}; path='/'; httpOnly; expires=${getCookieExpores()}`)
+                            `userid=${userId}; path=/; HttpOnly; expires=${getCookieExpores()}`)
                     }
                     response.end(JSON.stringify({
                         ...data
