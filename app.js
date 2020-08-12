@@ -80,18 +80,18 @@ const serverHandle = (request, response) => {
         }
         const blogData = handleBlogRouter(request, response)
         if (blogData) {
-            blogData.then(response => {
-                if (response && response.status === 'success') {
+            blogData.then(result => {
+                if (result && result.status === 'success') {
                     if (needSetCookie) {
                         response.setHeader('Set-Coookie',
                             `userid=${userId}; path=/; httpOnly; expires=${getCookieExpores()}`)
                     }
                     response.end(JSON.stringify({
-                        ...response
+                        ...result
                     }))
                     return
                 } else {
-                    resFailure(response)
+                    resFailure(result)
                 }
             }).catch(err => {
                 resFailure(err)
@@ -99,18 +99,18 @@ const serverHandle = (request, response) => {
         }
         const userData = handleUserRouter(request, response)
         if (userData) {
-            userData.then(data => {
-                if (data && data.status === 'success') {
+            userData.then(result => {
+                if (result && result.status === 'success') {
                     if (needSetCookie) {
                         response.setHeader('Set-Cookie',
                             `userid=${userId}; path=/; HttpOnly; expires=${getCookieExpores()}`)
                     }
                     response.end(JSON.stringify({
-                        ...data
+                        ...result
                     }))
                     return
                 } else {
-                    resFailure(data)
+                    resFailure(result)
                 }
             }).catch(err => {
                 resFailure(err)

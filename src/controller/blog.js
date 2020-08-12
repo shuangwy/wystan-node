@@ -53,7 +53,6 @@ const updateBlog = (id, blogData = {}) => {
 const deleteBlog = (id, author) => {
     const sql = `delete from blogs where id=${id} and author='${author}'`
     return exec(sql).then(res => {
-        console.log('res', res)
         if (res.affectedRows > 0) {
             return true
         }
