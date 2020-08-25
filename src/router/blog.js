@@ -21,10 +21,10 @@ const handleBlogRoute = (request, res) => {
     const id = request.query.id
     // get list
     if (method === 'GET' && request.path === '/api/blog/list') {
-        const loginResult = loginCheck(request)
-        if (loginResult) {
-            return loginResult
-        }
+        // const loginResult = loginCheck(request)
+        // if (loginResult) {
+        //     return loginResult
+        // }
         const author = request.query.author || ''
         const keyword = request.query.keyword || ''
         return getList(author, keyword).then(res => {
@@ -34,6 +34,10 @@ const handleBlogRoute = (request, res) => {
         })
     }
     if (method === 'GET' && request.path === '/api/blog/detail') {
+        const loginResult = loginCheck(request)
+        if (loginResult) {
+            return loginResult
+        }
         return getDetail(id).then(res => {
             return new SuccessModel(res)
         })
@@ -67,6 +71,7 @@ const handleBlogRoute = (request, res) => {
             return new ErrorModel('update failure')
         })
     }
+    // delete
     if (method === 'GET' && request.path === '/api/blog/delete') {
         const loginResult = loginCheck(request)
         if (loginResult) {

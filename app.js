@@ -1,6 +1,10 @@
 const handleBlogRouter = require('./src/router/blog')
 const handleUserRouter = require('./src/router/user')
 const querystring = require('querystring')
+const {
+    set,
+    get
+} = require('./src/db/redis')
 
 const SESSION_DATA = {}
 
@@ -34,7 +38,6 @@ const getPostData = (request) => {
         })
     })
 }
-
 
 const serverHandle = (request, response) => {
 

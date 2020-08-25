@@ -19,10 +19,12 @@ const get = (key) => {
     return new Promise((resolve, reject) => {
         redisClient.get(key, (err, val) => {
             if (err) {
-                return reject(err)
+                 reject(err)
+                 return 
             }
             if (val === null) {
-                return resolve(null)
+                 resolve(null)
+                 return
             }
             try {
                 resolve(JSON.parse(val))
