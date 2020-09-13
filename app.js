@@ -1,10 +1,7 @@
 const handleBlogRouter = require('./src/router/blog')
 const handleUserRouter = require('./src/router/user')
 const querystring = require('querystring')
-const {
-    set,
-    get
-} = require('./src/db/redis')
+// const { set, get} = require('./src/db/redis')
 
 const SESSION_DATA = {}
 
@@ -34,13 +31,13 @@ const getPostData = (request) => {
                 resovle()
                 return
             }
+            console.log('postData',postData)
             resovle(postData)
         })
     })
 }
 
 const serverHandle = (request, response) => {
-
     const resFailure = (errmessage) => {
         response.writeHead(404, {
             'Content-type': 'text/plain'
@@ -51,8 +48,8 @@ const serverHandle = (request, response) => {
             ...errmessage
         }))
     }
-
     response.setHeader('Content-type', 'application/json')
+    response.setHeader('Access-Control-Allow-Origin', '*')
     const url = request.url
     request.path = url.split('?')[0]
     request.query = querystring.parse(url.split('?')[1])
@@ -77,6 +74,15 @@ const serverHandle = (request, response) => {
         SESSION_DATA[userId] = {}
     }
     request.session = SESSION_DATA[userId]
+    if(request.method === "OPTIONS"){
+        response.writeHead(200, {
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Headers": "*",
+            "Access-Control-Allow-Methods": "*",
+        })
+        response.end()
+        return
+    }
     getPostData(request).then(postData => {
         if (postData) {
             request.body = JSON.parse(postData)
@@ -103,6 +109,7 @@ const serverHandle = (request, response) => {
         const userData = handleUserRouter(request, response)
         if (userData) {
             userData.then(result => {
+                console.log('result',result)
                 if (result && result.status === 'success') {
                     if (needSetCookie) {
                         response.setHeader('Set-Cookie',

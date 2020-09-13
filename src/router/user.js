@@ -9,11 +9,11 @@ const {
 
 const handleUserRouter = (request, res) => {
     const method = request.method
-    if (method === 'GET' && request.path === '/api/user/login') {
+    if (method === 'POST' && request.path === '/api/user/login') {
         const {
             username,
             password
-        } = request.query
+        } = request.body
         return login(username, password).then(data => {
             if (data.username) {
                 const {
