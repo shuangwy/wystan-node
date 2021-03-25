@@ -6,20 +6,20 @@ const { access } = require("./src/utils/log");
 
 const SESSION_DATA = {};
 
-const getCookieExpores = () => {
+const getCookieExplores = () => {
   const d = new Date();
   d.setTime(d.getTime() + 24 * 60 * 1000);
   return d.toGMTString();
 };
 
 const getPostData = (request) => {
-  return new Promise((resovle, reject) => {
+  return new Promise((resolve, reject) => {
     if (request.method !== "POST") {
-      resovle();
+      resolve();
       return;
     }
     if (request.headers["content-type"] !== "application/json") {
-      resovle();
+      resolve();
       return;
     }
     let postData = "";
@@ -28,11 +28,11 @@ const getPostData = (request) => {
     });
     request.on("end", () => {
       if (!postData) {
-        resovle();
+        resolve();
         return;
       }
       console.log("postData", postData);
-      resovle(postData);
+      resolve(postData);
     });
   });
 };
@@ -43,7 +43,7 @@ const serverHandle = (request, response) => {
       request.headers["user-agent"]
     }--${Date.now()}`
   );
-  const resFailure = (errmessage) => {
+  const resFailure = (errormessage) => {
     response.writeHead(404, {
       "Content-type": "text/plain",
     });
@@ -51,7 +51,7 @@ const serverHandle = (request, response) => {
     response.end(
       JSON.stringify({
         _failure: true,
-        ...errmessage,
+        ...errormessage,
       })
     );
   };
@@ -102,8 +102,8 @@ const serverHandle = (request, response) => {
           if (result && result.status === "success") {
             if (needSetCookie) {
               response.setHeader(
-                "Set-Coookie",
-                `userid=${userId}; path=/; httpOnly; expires=${getCookieExpores()}`
+                "Set-Cookie",
+                `userid=${userId}; path=/; httpOnly; expires=${getCookieExplores()}`
               );
             }
             response.end(
@@ -129,7 +129,7 @@ const serverHandle = (request, response) => {
             if (needSetCookie) {
               response.setHeader(
                 "Set-Cookie",
-                `userid=${userId}; path=/; HttpOnly; expires=${getCookieExpores()}`
+                `userid=${userId}; path=/; HttpOnly; expires=${getCookieExplores()}`
               );
             }
             response.end(
